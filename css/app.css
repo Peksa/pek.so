@@ -36,6 +36,10 @@ body {
     color: #3388ee;
 }
 
+.view {
+    height: 100%;
+}
+
 .main-cover {
     height: 100%;
     text-align: center;

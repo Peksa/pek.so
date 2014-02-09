@@ -1,4 +1,4 @@
-var pekso = angular.module('pekso', []);
+var pekso = angular.module('pekso', ['ngRoute']);
 
 pekso.service('$config', function() {
     console.log("Creating config service");
@@ -8,29 +8,49 @@ pekso.service('$config', function() {
     this.awsRegion = 'eu-west-1';
 });
 
+pekso.config(function($routeProvider, $locationProvider) {
+    console.log("Creating pekso config");
+    $routeProvider.when('/', {
+        templateUrl: 'main.html',
+        controller: MainCntl
+    });
+    $routeProvider.when('/admin', {
+        templateUrl: 'admin.html',
+        controller: AdminCntl
+    });
+    $routeProvider.otherwise({
+        redirectTo: '/'
+    })
+    $locationProvider.html5Mode(false);
+});
+
 pekso.factory('$fb', function($config) {
-    console.log("Creating fb factory");
+    console.log("Creating fb factory")
+
+    FB.init({
+        appId: $config.fbAppId,
+        status: false,
+        cookie: true,
+        xfbml: false
+    });
+
     return {
-        init: function() {
-            console.log("FB init called");
-            FB.init({
-                appId: $config.fbAppId,
-                status: false,
-                cookie: true,
-                xfbml: false
-            });
+        getLoginStatus: function(callback) {
+            FB.getLoginStatus(callback);
         },
-        login: function() {
-            console.log("FB login called");
-            FB.login();
-        },
-        onLogin: function(callback) {
-            FB.Event.subscribe('auth.authResponseChange', function(response) {
-                console.log("FB change state to: " + response.status);
+        getAccessToken: function(callback) {
+            this.getLoginStatus(function(response) {
                 if (response.status === 'connected') {
                     callback(null, response.authResponse.accessToken);
                 } else {
-                    callback(response.status, null);
+                    FB.login(function(response) {
+                        console.log("FB change state to: " + response.status);
+                        if (response.status === 'connected') {
+                            callback(null, response.authResponse.accessToken);
+                        } else {
+                            callback(response.status, null);
+                        }
+                    });
                 }
             });
         }
@@ -66,18 +86,29 @@ pekso.factory('$aws', function($config) {
 
 pekso.factory('$pekso', function($fb, $aws) {
     console.log("Creating pekso factory");
+
+    var loggedIn = false;
+    var self = this;
+
     return {
         init: function(callback) {
-            $fb.init();
-            $fb.login();
-            $fb.onLogin(function(err, accessToken) {
+            $fb.getAccessToken(function(err, accessToken) {
                 if (err) {
                     callback("Error with FB-login: " + err);
                 } else {
                     $aws.init(accessToken);
-                    callback(undefined, "success");
+                    callback(null, "success");
                 }
             });
+        },
+        isLoggedIn: function() {
+            return self.loggedIn;
+        },
+        login: function() {
+            self.loggedIn = true;
+        },
+        logout: function() {
+            self.loggedIn = false;
         },
         list: function(callback) {
             $aws.s3().listObjects(function(err, response) {
@@ -88,8 +119,15 @@ pekso.factory('$pekso', function($fb, $aws) {
 
                 for (var i in response.Contents) {
                     var key = response.Contents[i].Key;
+
+                    if (key.indexOf('.') !== -1 || key.indexOf('/') !== -1) {
+                        --remaining;
+                        continue;
+                    }
                     $aws.s3().getObject({ Key: key }, function(err, response) {
-                        requests.push({key: this.request.params.Key, url: response.WebsiteRedirectLocation});
+                        if (response.WebsiteRedirectLocation) {
+                            requests.push({key: this.request.params.Key, url: response.WebsiteRedirectLocation});
+                        }
                         --remaining;
                         if (remaining <= 0) {
                             callback(null, requests);
@@ -114,35 +152,73 @@ pekso.factory('$pekso', function($fb, $aws) {
     }
 });
 
+function MainCntl($scope, $pekso, $fb, $location) {
+    console.log("Main controller!");
 
-
-function PeksoCtrl($pekso, $scope) {
+    // Check if already logged in to FB.
+    if (!$pekso.isLoggedIn()) {
+        $fb.getLoginStatus(function(response) {
+            console.log("FB STATUS ON LOAD: " + response.status);
+            if (response.status === 'connected') {
+                console.log("Already FB logged in, sending to /admin")
+                $pekso.login();
+                $scope.$apply(function() {
+                    $location.path('/admin');
+                });
+            }
+        });
+    }
 
     $scope.login = function() {
-        $scope.loggedIn = true;
-
-        $pekso.init(function(err) {
-            if (err) {
-                $scope.err = err;
-                return;
-            }
-
-            $pekso.list(function(err, data) {
-                if (err) {
-                    $scope.err = "Oh snap, " + err;
+        console.log("login");
+        $fb.getAccessToken(function(err, accessToken) {
+            if (accessToken) {
+                console.log("Logged in, sending to /admin")
+                $pekso.login();
+                if(!$scope.$$phase) {
+                    $scope.$apply(function() {
+                        $location.path('/admin');
+                    })
                 } else {
-                    $scope.urls = data;
-                    $scope.err = undefined;
+                    $location.path('/admin');
                 }
-                $scope.$apply();
-            });
 
-        });
+            } else {
+                alert("Error! :( " + err);
+            }
+        })
     };
+}
+
+
+function AdminCntl($scope, $pekso, $location) {
+    console.log("Admin controller!");
+
+    if (!$pekso.isLoggedIn()) {
+        $location.path('/');
+    }
 
     $scope.logout = function() {
-        $scope.loggedIn = false;
+        $location.path('/');
     };
+
+    $pekso.init(function(err) {
+        if (err) {
+            $scope.err = err;
+            return;
+        }
+
+        $pekso.list(function(err, data) {
+            if (err) {
+                $scope.err = "Oh snap, " + err;
+            } else {
+                $scope.urls = data;
+                $scope.err = undefined;
+            }
+            $scope.$apply();
+        });
+
+    });
 
     $scope.create = function() {
         $scope.sending = true;
@@ -167,7 +243,7 @@ function PeksoCtrl($pekso, $scope) {
     $scope.random = function() {
         var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
         var ret = "";
-        for (var i=0; i < 3; i++) {
+        for (var i = 0; i < 3; i++) {
             var rnum = Math.floor(Math.random() * chars.length);
             ret += chars[rnum];
         }
@@ -176,7 +252,5 @@ function PeksoCtrl($pekso, $scope) {
 
     $scope.random();
 }
-
-
 
 

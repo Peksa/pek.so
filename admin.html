@@ -1,0 +1,43 @@
+<div class="container">
+    <div class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">pek.so</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">URLs</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="" ng-click="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="err" class="alert alert-danger">{{err}}</div>
+
+    <div>
+        <table class="table table-striped">
+            <tr>
+                <th>Key</th><th>URL</th><th>Edit</th></tr>
+            </tr>
+            <tr ng-repeat="url in urls">
+                <td><a class="ext" href="http://pek.so/{{url.key}}">{{url.key}}</a></td>
+                <td>{{url.url}}</td>
+                <td><button ng-click="remove(url)">Delete</button></td>
+            </tr>
+            <tr>
+                <td><input type="text" ng-model="newKey" ng-readonly="saving"> <button ng-click="random()">Generate</button></td>
+                <td><input type="text" ng-model="newUrl" ng-readonly="saving" autofocus></td>
+                <td><button ng-click="create()">Save</button></td>
+            </tr>
+        </table>
+    </div>
+</div>
