@@ -12,6 +12,9 @@ Demo
 * http://pek.so/A9P
 * http://pek.so/t
 
+
+![Admin GUI](https://dl.dropboxusercontent.com/u/12279637/pekso.png)
+
 Setup your own URL-shortener
 ----------------------------
 
