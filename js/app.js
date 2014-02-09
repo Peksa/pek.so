@@ -6,6 +6,7 @@ pekso.service('$config', function() {
     this.awsS3Bucket = 'pek.so';
     this.awsWebIdentityRole = 'arn:aws:iam::507606061091:role/pek.so';
     this.awsRegion = 'eu-west-1';
+    this.domain = 'http://pek.so'; // avoid trailing slash
 });
 
 pekso.config(function($routeProvider, $locationProvider) {
@@ -191,8 +192,10 @@ function MainCntl($scope, $pekso, $fb, $location) {
 }
 
 
-function AdminCntl($scope, $pekso, $location) {
+function AdminCntl($scope, $pekso, $location, $config) {
     console.log("Admin controller!");
+
+    $scope.domain = $config.domain;
 
     if (!$pekso.isLoggedIn()) {
         $location.path('/');

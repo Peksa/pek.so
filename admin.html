@@ -29,7 +29,7 @@
                 <th>Key</th><th>URL</th><th>Edit</th></tr>
             </tr>
             <tr ng-repeat="url in urls">
-                <td><a class="ext" href="http://pek.so/{{url.key}}">{{url.key}}</a></td>
+                <td><a class="ext" href="{{domain}}/{{url.key}}">{{url.key}}</a></td>
                 <td>{{url.url}}</td>
                 <td><button ng-click="remove(url)">Delete</button></td>
             </tr>
