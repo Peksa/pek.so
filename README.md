@@ -1,25 +1,26 @@
 pek.so
 ======
 
-pek.so is a custom URL-shortener for private use. It is hosted entirely on Amazon AWS and is backend Free!
+pek.so is a custom URL-shortener for private use. It is hosted entirely on Amazon AWS and is backend free!
 
 You can download and use this code in order to create your own private URL-shortener!
 
 Demo
 ----
-http://pek.so, 
-http://pek.so/about, 
-http://pek.so/t
+* http://pek.so
+* http://pek.so/about
+* http://pek.so/A9P
+* http://pek.so/t
 
 Setup your own URL-shortener
 ----------------------------
 
 Requirements:
 
-1. A custom domain (i.e. pek.so)
-2. Amazon AWS (S3, IAM, Route53, CloudFront optional)
-3. Facebook app.
-4. A personal Facebook account.
+* A custom domain (i.e. pek.so)
+* Amazon AWS (S3, IAM, Route53, CloudFront optional)
+* Facebook app.
+* A personal Facebook account.
 
 
 Step 1. Setup S3 bucket
@@ -73,27 +74,27 @@ Step 2. Setup Route 53
 ----------------------
 1. Create a new hosted zone for your domain.
 2. Point your domain nameserver (via your domain providers control panel) to the nameserver provided by Route 53.
-3. Setup an A pointer for your root domain with Alias to point at your bucket, i.e: 'pek.so.s3-website-eu-west-1.amazonaws.com'
+3. Setup an A pointer for your root domain with Alias to point at your bucket, i.e. 'pek.so.s3-website-eu-west-1.amazonaws.com'
 
 Step 3. Setup Facebook application
 ----------------------------------
 Now we'll create a facebook application. This will allow you to administer your URL-shortener directly online by logging into Facebook.
 
 1. Create a new Facebook app on http://developers.facebook.com
-2. Set Site URL to your domain, i.e.: http://pek.so
-3. Set App Domains to your domain, i.e.: pek.so
-4. Make a note of your Facebook App ID which will be used later, i.e: 602729056487961.
+2. Set Site URL to your domain, i.e. http://pek.so
+3. Set App Domains to your domain, i.e. pek.so
+4. Make a note of your Facebook App ID which will be used later, i.e. 602729056487961.
 
 Step 4. Configure IAM
 ---------------------
-Now we'll add a role that will allow only you to modify contents of your S3 bucket after you've logged into to Facebook.
+Now we'll add a role that will allow only you to modify contents of your S3 bucket after you've logged into Facebook.
 
 1. In the AWS console, head to IAM and create a new role. Name it anything, I've named mine 'pek.so'.
 2. Select 'Role for Identity Provider Access'
 3. Select 'Grant access to web identity providers'
 4. Select Identity Provider: Facebook and enter your Facebook application id.
 5. Click 'Add conditions', make sure Condition is StringEquals and select Key: 'graph.facebook.com:id'
-6. Enter your own personal facebook id. If you don't know it, the simplest way to find it is to go to http://graph.facebook.com/<your facebook username>, i.e. http://graph.facebook.com/peksa, my user id is 717273996.
+6. Enter your own personal facebook id. If you don't know it, the simplest way to find it is to go to http://graph.facebook.com/fbusername, i.e. http://graph.facebook.com/peksa, my user id is 717273996.
 7. After you've saved your conditition, continue.
 8. Your Trust Policy Document should now look similiar to mine:
 
