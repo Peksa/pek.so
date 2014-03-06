@@ -22,7 +22,7 @@ pekso.config(function($routeProvider, $locationProvider) {
     $routeProvider.otherwise({
         redirectTo: '/'
     })
-    $locationProvider.html5Mode(false);
+    $locationProvider.html5Mode(true);
 });
 
 pekso.factory('$fb', function($config) {
