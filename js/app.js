@@ -67,12 +67,14 @@ pekso.factory('$aws', function($config) {
             if (this.initialized) {
                 return;
             }
-            AWS.config.credentials = new AWS.WebIdentityCredentials({
-                RoleArn: $config.awsWebIdentityRole,
-                ProviderId: 'graph.facebook.com',
-                WebIdentityToken: accessToken
-            });
             AWS.config.region = $config.awsRegion;
+            AWS.config.update({
+                credentials: new AWS.WebIdentityCredentials({
+                    RoleArn: $config.awsWebIdentityRole,
+                    ProviderId: 'graph.facebook.com',
+                    WebIdentityToken: accessToken
+                })
+            });
             this.initialized = true;
         },
         s3: function() {
@@ -125,7 +127,7 @@ pekso.factory('$pekso', function($fb, $aws) {
                         --remaining;
                         continue;
                     }
-                    $aws.s3().getObject({ Key: key }, function(err, response) {
+                    $aws.s3().headObject({ Key: key }, function(err, response) {
                         if (response.WebsiteRedirectLocation) {
                             requests.push({key: this.request.params.Key, url: response.WebsiteRedirectLocation});
                         }
@@ -255,5 +257,4 @@ function AdminCntl($scope, $pekso, $location, $config) {
 
     $scope.random();
 }
-
 
