@@ -30,8 +30,8 @@ Step 1. Setup S3 bucket
 -------------------------------------------------
 Let's setup an S3 bucket to host our URL-shortener.
 
-1. Create a S3 bucket in the AWS console, name it the name of your domain, i.e. 'pek.so'.
-2. Grant s3:GetObject permissions to everyone for the bucket:
+1. Create a S3 bucket in the AWS console, name it the name of your domain, i.e. `pek.so`.
+2. Edit the bucket policy to grant s3:GetObject permissions to everyone for the bucket:
     
     ```json
 {
@@ -71,34 +71,45 @@ Let's setup an S3 bucket to host our URL-shortener.
 </CORSConfiguration>
     ```
 
-4. Enable website hosting on the S3 bucket, and set the Index Document to 'index.html'
+4. Enable static website hosting on the S3 bucket, and set the Index Document to `index.html`
 
 Step 2. Setup Route 53
 ----------------------
 1. Create a new hosted zone for your domain.
 2. Point your domain nameserver (via your domain providers control panel) to the nameserver provided by Route 53.
-3. Setup an A pointer for your root domain with Alias to point at your bucket, i.e. 'pek.so.s3-website-eu-west-1.amazonaws.com'
+3. Setup an A pointer for your root domain with Alias to point at your bucket, i.e. `pek.so.s3-website-eu-west-1.amazonaws.com`
 
 Step 3. Setup Facebook application
 ----------------------------------
 Now we'll create a facebook application. This will allow you to administer your URL-shortener directly online by logging into Facebook.
 
-1. Create a new Facebook app on http://developers.facebook.com
+1. Create a new Facebook app (website) on https://developers.facebook.com/apps/
 2. Set Site URL to your domain, i.e. http://pek.so
-3. Set App Domains to your domain, i.e. pek.so
+3. In the app settings, set App Domains to your domain, i.e. pek.so
 4. Make a note of your Facebook App ID which will be used later, i.e. 602729056487961.
+5. Make a note of your Facebook App Secret, which will be used in the next step.
+
+Step 3. Find your application specific user id
+----------------------------------------------
+
+1. We'll now manually log in to your app. Visit this URL (replace APP_ID and change the redirect_uri to your domain): https://www.facebook.com/dialog/oauth?client_id=APP_ID&redirect_uri=http://pek.so/redirect
+2. After authorizing the app, you'll be redirected to your domain with a code URL parameter, something like: http://pek.so/redirect?code=LONG_CODE
+3. Extract the code, and now visit (replace parameters with your values): https://graph.facebook.com/v2.3/oauth/access_token?client_id=APP_ID&redirect_uri=http://pek.so/redirect&client_secret=CLIENT_SECRET&code=CODE
+4. Save the access_token that you get back.
+5. Visit https://graph.facebook.com/me?access_token=ACCESS_TOKEN
+6. Save the ID you get back for later.
 
 Step 4. Configure IAM
 ---------------------
 Now we'll add a role that will allow only you to modify contents of your S3 bucket after you've logged into Facebook.
 
-1. In the AWS console, head to IAM and create a new role. Name it anything, I've named mine 'pek.so'.
-2. Select 'Role for Identity Provider Access'
-3. Select 'Grant access to web identity providers'
+1. In the AWS console, head to IAM and create a new role. Name it anything, I've named mine `pek.so`.
+2. Select `Role for Identity Provider Access`
+3. Select `Grant access to web identity providers`
 4. Select Identity Provider: Facebook and enter your Facebook application id.
-5. Click 'Add conditions', make sure Condition is StringEquals and select Key: 'graph.facebook.com:id'
-6. Enter your own personal facebook id. If you don't know it, the simplest way to find it is to go to http://graph.facebook.com/fbusername, i.e. http://graph.facebook.com/peksa, my user id is 717273996.
-7. After you've saved your conditition, continue.
+5. Click `Add conditions`, make sure Condition is StringEquals and select Key: `graph.facebook.com:id`
+6. Enter your application specific user id that you found in step 3 (not the FB App ID)
+7. After you've saved your condition, continue.
 8. Your Trust Policy Document should now look similiar to mine:
 
     ```json
@@ -120,8 +131,10 @@ Now we'll add a role that will allow only you to modify contents of your S3 buck
     }
   ]
 }
+
     ```
-9. Select Custom Policy, give it any name, i.e. pek.so-20140209, with the following document:
+10. Save the role and make a note of the Role ARN for later, i.e. arn:aws:iam::507606061091:role/pek.so
+11. Add a new inline role policy to the role, I called mine pek.so-20140209, and give it the following contents:
 
     ```json
 {
@@ -144,7 +157,6 @@ Now we'll add a role that will allow only you to modify contents of your S3 buck
   ]
 }
     ```
-10. Save the Role ARN that you'll see for later, i.e. arn:aws:iam::507606061091:role/pek.so
 
 Step 5. Configure the admin application
 ---------------------------------------
