@@ -89,7 +89,7 @@ Now we'll create a facebook application. This will allow you to administer your 
 4. Make a note of your Facebook App ID which will be used later, i.e. 602729056487961.
 5. Make a note of your Facebook App Secret, which will be used in the next step.
 
-Step 3. Find your application specific user id
+Step 4. Find your application specific user id
 ----------------------------------------------
 
 1. We'll now manually log in to your app. Visit this URL (replace APP_ID and change the redirect_uri to your domain): https://www.facebook.com/dialog/oauth?client_id=APP_ID&redirect_uri=http://pek.so/redirect
@@ -99,7 +99,7 @@ Step 3. Find your application specific user id
 5. Visit https://graph.facebook.com/me?access_token=ACCESS_TOKEN
 6. Save the ID you get back for later.
 
-Step 4. Configure IAM
+Step 5. Configure IAM
 ---------------------
 Now we'll add a role that will allow only you to modify contents of your S3 bucket after you've logged into Facebook.
 
@@ -158,7 +158,7 @@ Now we'll add a role that will allow only you to modify contents of your S3 buck
 }
     ```
 
-Step 5. Configure the admin application
+Step 6. Configure the admin application
 ---------------------------------------
 Clone this repo, modify the js/app.js file and upload it to the root of your S3 bucket.
 The parts that need changing in app.js are:
