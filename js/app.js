@@ -125,17 +125,21 @@ pekso.factory('$pekso', function($fb, $aws) {
 
                     if (key.indexOf('.') !== -1 || key.indexOf('/') !== -1) {
                         --remaining;
-                        continue;
-                    }
-                    $aws.s3().headObject({ Key: key }, function(err, response) {
-                        if (response.WebsiteRedirectLocation) {
-                            requests.push({key: this.request.params.Key, url: response.WebsiteRedirectLocation});
-                        }
-                        --remaining;
                         if (remaining <= 0) {
                             callback(null, requests);
                         }
-                    });
+                        continue;
+                    } else {
+                        $aws.s3().headObject({ Key: key }, function(err, response) {
+                            if (response.WebsiteRedirectLocation) {
+                                requests.push({key: this.request.params.Key, url: response.WebsiteRedirectLocation});
+                            }
+                            --remaining;
+                            if (remaining <= 0) {
+                                callback(null, requests);
+                            }
+                        });
+                    }
                 }
             });
         },
