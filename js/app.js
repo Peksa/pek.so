@@ -240,7 +240,8 @@ function AdminCntl($scope, $pekso, $location, $config) {
     $scope.remove = function(row) {
         $pekso.remove(row.key, function(err) {
             if (err) { $scope.err = err; return; }
-            $scope.urls.splice(this.$index, 1);
+            var deleteIndex = $scope.urls.indexOf(row);
+            $scope.urls.splice(deleteIndex, 1);
             $scope.$apply();
         });
     };
