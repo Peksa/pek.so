@@ -71,7 +71,7 @@ Let's setup an S3 bucket to host our URL-shortener.
 </CORSConfiguration>
     ```
 
-4. Enable static website hosting on the S3 bucket, and set the Index Document to `index.html`
+4. Enable static website hosting on the S3 bucket, and set the Index Document and the Error Document to `index.html`
 
 Step 2. Setup Route 53
 ----------------------
