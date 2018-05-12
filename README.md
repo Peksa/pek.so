@@ -13,7 +13,7 @@ Demo
 * http://pek.so/t
 
 
-![Admin GUI](https://dl.dropboxusercontent.com/u/12279637/pekso.png)
+![Admin GUI](https://pek.so/pekso.png "Admin GUI")
 
 Setup your own URL-shortener
 ----------------------------
@@ -33,7 +33,7 @@ Let's setup an S3 bucket to host our URL-shortener.
 1. Create a S3 bucket in the AWS console, name it the name of your domain, i.e. `pek.so`.
 2. Edit the bucket policy to grant s3:GetObject permissions to everyone for the bucket:
     
-    ```json
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -48,11 +48,11 @@ Let's setup an S3 bucket to host our URL-shortener.
     }
   ]
 }
-    ```
+```
 
 3. Add CORS configuration to the bucket:
 
-    ```xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
     <CORSRule>
@@ -69,7 +69,7 @@ Let's setup an S3 bucket to host our URL-shortener.
         <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
-    ```
+```
 
 4. Enable static website hosting on the S3 bucket, and set the Index Document and the Error Document to `index.html`
 
@@ -112,7 +112,7 @@ Now we'll add a role that will allow only you to modify contents of your S3 buck
 7. After you've saved your condition, continue.
 8. Your Trust Policy Document should now look similiar to mine:
 
-    ```json
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -131,12 +131,12 @@ Now we'll add a role that will allow only you to modify contents of your S3 buck
     }
   ]
 }
+```
 
-    ```
 10. Save the role and make a note of the Role ARN for later, i.e. arn:aws:iam::507606061091:role/pek.so
 11. Add a new inline role policy to the role, I called mine pek.so-20140209, and give it the following contents:
 
-    ```json
+```json
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -156,7 +156,7 @@ Now we'll add a role that will allow only you to modify contents of your S3 buck
     }
   ]
 }
-    ```
+```
 
 Step 6. Configure the admin application
 ---------------------------------------
